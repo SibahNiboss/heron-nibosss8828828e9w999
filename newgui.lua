@@ -162,7 +162,7 @@ local function createActionBtn(text, xPos)
     btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Font = Enum.Font.SourceSans
-    btn.TextSize = 14
+    btn.TextS = 14
     Instance.new("UICorner", btn)
     Instance.new("UIStroke", btn).Color = Color3.fromRGB(180, 0, 255)
     return btn
@@ -182,51 +182,101 @@ musicBtn.Font = Enum.Font.SourceSans
 musicBtn.TextSize = 15
 Instance.new("UICorner", musicBtn)
 
--- 1. Inisialisasi GUI Utama
+-- Parent GUI
 local ScreenGui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
-local UsernameInput = Instance.new("TextBox")
-local CopyBtn = Instance.new("TextButton")
-local OpenBtn = Instance.new("TextButton")
-
+ScreenGui.Name = "Brookhaven_Avatar_System"
 ScreenGui.Parent = game.CoreGui
-ScreenGui.Name = "BrookhavenStealer"
+ScreenGui.ResetOnSpawn = false
 
--- 2. Tombol untuk Buka/Tutup Menu (Floating)
-OpenBtn.Name = "OpenBtn"
-OpenBtn.Parent = ScreenGui
-OpenBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-OpenBtn.Position = UDim2.new(0, 10, 0.5, 0)
-OpenBtn.Size = UDim2.new(0, 80, 0, 30)
-OpenBtn.Text = "Menu Copy"
-OpenBtn.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", OpenBtn)
+-- 1. TOMBOL BULAT (👕)
+local RoundBtn = Instance.new("TextButton")
+RoundBtn.Name = "LauncherBtn"
+RoundBtn.Parent = ScreenGui
+RoundBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+RoundBtn.Position = UDim2.new(0, 100, 0, 100)
+RoundBtn.Size = UDim2.new(0, 55, 0, 55)
+RoundBtn.Text = "👕"
+RoundBtn.TextSize = 30
+RoundBtn.TextColor3 = Color3.new(1, 1, 1)
+RoundBtn.ZIndex = 10
 
--- 3. Frame Pop-up (Menu Utama)
+local RoundCorner = Instance.new("UICorner")
+RoundCorner.CornerRadius = UDim.new(1, 0)
+RoundCorner.Parent = RoundBtn
+
+local RoundStroke = Instance.new("UIStroke")
+RoundStroke.Color = Color3.fromRGB(160, 32, 240)
+RoundStroke.Thickness = 2.5
+RoundStroke.Parent = RoundBtn
+
+-- 2. POP-UP MENU
+local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-MainFrame.Position = UDim2.new(0.5, -100, 0.5, -60)
-MainFrame.Size = UDim2.new(0, 200, 0, 120)
-MainFrame.Visible = false -- Tersembunyi di awal
-Instance.new("UICorner", MainFrame)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+MainFrame.Position = UDim2.new(0, 165, 0, 100)
+MainFrame.Size = UDim2.new(0, 220, 0, 140)
+MainFrame.Visible = false
+MainFrame.ZIndex = 5
 
--- 4. Input Username
+local FrameCorner = Instance.new("UICorner")
+FrameCorner.CornerRadius = UDim.new(0, 10)
+FrameCorner.Parent = MainFrame
+
+local FrameStroke = Instance.new("UIStroke")
+FrameStroke.Color = Color3.fromRGB(160, 32, 240)
+FrameStroke.Thickness = 2
+FrameStroke.Parent = MainFrame
+
+-- 3. INPUT USERNAME
+local UsernameInput = Instance.new("TextBox")
 UsernameInput.Parent = MainFrame
-UsernameInput.PlaceholderText = "Nama Player..."
+UsernameInput.PlaceholderText = "Username/Display..."
 UsernameInput.Position = UDim2.new(0.1, 0, 0.2, 0)
-UsernameInput.Size = UDim2.new(0.8, 0, 0, 30)
+UsernameInput.Size = UDim2.new(0.8, 0, 0, 35)
+UsernameInput.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+UsernameInput.TextColor3 = Color3.new(1, 1, 1)
 UsernameInput.Text = ""
 Instance.new("UICorner", UsernameInput)
 
--- 5. Tombol Copy Ava
+-- 4. TOMBOL COPY AVA
+local CopyBtn = Instance.new("TextButton")
 CopyBtn.Parent = MainFrame
 CopyBtn.Text = "Copy Ava"
-CopyBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+CopyBtn.BackgroundColor3 = Color3.fromRGB(160, 32, 240)
 CopyBtn.Position = UDim2.new(0.1, 0, 0.6, 0)
-CopyBtn.Size = UDim2.new(0.8, 0, 0, 35)
+CopyBtn.Size = UDim2.new(0.8, 0, 0, 40)
 CopyBtn.TextColor3 = Color3.new(1, 1, 1)
+CopyBtn.Font = Enum.Font.SourceSansBold
+CopyBtn.TextSize = 18
 Instance.new("UICorner", CopyBtn)
+
+-- FUNGSI DRAGGABLE
+local function makeDraggable(obj)
+	local dragging, dragInput, dragStart, startPos
+	obj.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			dragStart = input.Position
+			startPos = obj.Position
+		end
+	end)
+	obj.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end
+	end)
+	UserInputService.InputChanged:Connect(function(input)
+		if input == dragInput and dragging then
+			local delta = input.Position - dragStart
+			obj.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		end
+	end)
+	UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+	end)
+end
+
+makeDraggable(RoundBtn)
+makeDraggable(MainFrame)
 
 local isOpen = false
 local function toggleGUI()
@@ -262,47 +312,45 @@ end
 toggleBtn.MouseButton1Click:Connect(toggleGUI)
 closeBtn.MouseButton1Click:Connect(toggleGUI)
 
--- FUNGSI 1: Toggle (Buka/Tutup)
-OpenBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
+-- Toggle Pop-up saat tombol bulat ditekan
+RoundBtn.MouseButton1Click:Connect(function()
+	MainFrame.Visible = not MainFrame.Visible
 end)
 
--- FUNGSI 2: Auto-Correct & Copy Avatar
+-- Eksekusi Copy Avatar Brookhaven
 CopyBtn.MouseButton1Click:Connect(function()
-    local input = UsernameInput.Text:lower()
-    local targetPlayer = nil
-    
-    -- Mencari player berdasarkan potongan nama (Auto-correct)
-    for _, player in pairs(game.Players:GetPlayers()) do
-        if string.sub(player.Name:lower(), 1, #input) == input then
-            targetPlayer = player
-            break
-        end
-    end
+	local input = UsernameInput.Text:lower()
+	local targetPlayer = nil
+	
+	-- Auto-correct (mencari player terdekat)
+	for _, p in pairs(Players:GetPlayers()) do
+		if p.Name:lower():sub(1, #input) == input or p.DisplayName:lower():sub(1, #input) == input then
+			targetPlayer = p
+			break
+		end
+	end
 
-    if targetPlayer then
-        UsernameInput.Text = targetPlayer.Name -- Koreksi teks ke nama asli
-        
-        -- Eksekusi ke Remote Brookhaven
-        -- Kita pakai pcall (protected call) supaya script gak error kalau remote berubah
-        local success, err = pcall(function()
-            local args = {
-                [1] = "Outfit",
-                [2] = targetPlayer.UserId
-            }
-            game:GetService("ReplicatedStorage").RE:FindFirstChild("AvatarEvent"):FireServer(unpack(args))
-        end)
-        
-        if success then
-            print("Avatar " .. targetPlayer.Name .. " Berhasil di-copy!")
-        else
-            warn("Gagal copy: Remote Brookhaven mungkin berubah.")
-        end
-    else
-        UsernameInput.Text = "Pemain Tidak Ada!"
-        task.wait(1)
-        UsernameInput.Text = ""
-    end
+	if targetPlayer then
+		UsernameInput.Text = targetPlayer.Name
+		
+		-- Remote Brookhaven (Update jika Remote berubah)
+		local re = ReplicatedStorage:FindFirstChild("RE")
+		local event = re and re:FindFirstChild("AvatarEvent")
+		
+		if event then
+			-- Mengirim sinyal ganti outfit ke server Brookhaven
+			event:FireServer("Outfit", targetPlayer.UserId)
+			CopyBtn.Text = "Berhasil!"
+			task.wait(1)
+			CopyBtn.Text = "Copy Ava"
+		else
+			UsernameInput.Text = "Remote Gagal!"
+		end
+	else
+		UsernameInput.Text = "Player Tak Ada!"
+		task.wait(1)
+		UsernameInput.Text = ""
+	end
 end)
 
 -- list player
