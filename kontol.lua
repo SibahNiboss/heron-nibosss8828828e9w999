@@ -247,6 +247,40 @@ copyExecuteBtn.Font = Enum.Font.GothamBold
 copyExecuteBtn.TextSize = 16
 Instance.new("UICorner", copyExecuteBtn).CornerRadius = UDim.new(0, 12)
 
+local isOpen = false
+local function toggleGUI()
+    clickSound:Play()
+    if not isOpen then
+        isOpen = true
+        main.Visible = true
+        TweenService:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, 380, 0, 280)
+        }):Play()
+        task.delay(0.1, function()
+            TweenService:Create(canvas, TweenInfo.new(0.3), {GroupTransparency = 0}):Play()
+        end)
+    else
+        isOpen = false
+        local fadeOut = TweenService:Create(canvas, TweenInfo.new(0.25), {GroupTransparency = 1})
+        fadeOut:Play()
+        
+        fadeOut.Completed:Connect(function()
+            if not isOpen then
+                local shrink = TweenService:Create(main, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+                    Size = UDim2.new(0, 0, 0, 0)
+                })
+                shrink:Play()
+                shrink.Completed:Connect(function()
+                    if not isOpen then main.Visible = false end
+                end)
+            end
+        end)
+    end
+end
+
+toggleBtn.MouseButton1Click:Connect(toggleGUI)
+closeBtn.MouseButton1Click:Connect(toggleGUI)
+
 -- Toggle logic section (smooth tween)
 local copyOpen = false
 copyToggleBtn.MouseButton1Click:Connect(function()
@@ -378,40 +412,6 @@ copyExecuteBtn.MouseButton1Click:Connect(function()
 
     notify("Sukses copy avatar dari " .. TPlayer.DisplayName .. "! Cek di game bro 🔥")
 end)
-
-local isOpen = false
-local function toggleGUI()
-    clickSound:Play()
-    if not isOpen then
-        isOpen = true
-        main.Visible = true
-        TweenService:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0, 380, 0, 280)
-        }):Play()
-        task.delay(0.1, function()
-            TweenService:Create(canvas, TweenInfo.new(0.3), {GroupTransparency = 0}):Play()
-        end)
-    else
-        isOpen = false
-        local fadeOut = TweenService:Create(canvas, TweenInfo.new(0.25), {GroupTransparency = 1})
-        fadeOut:Play()
-        
-        fadeOut.Completed:Connect(function()
-            if not isOpen then
-                local shrink = TweenService:Create(main, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
-                    Size = UDim2.new(0, 0, 0, 0)
-                })
-                shrink:Play()
-                shrink.Completed:Connect(function()
-                    if not isOpen then main.Visible = false end
-                end)
-            end
-        end)
-    end
-end
-
-toggleBtn.MouseButton1Click:Connect(toggleGUI)
-closeBtn.MouseButton1Click:Connect(toggleGUI)
 
 -- list player
 local listGui = nil
