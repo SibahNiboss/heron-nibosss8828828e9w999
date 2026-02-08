@@ -182,6 +182,52 @@ musicBtn.Font = Enum.Font.SourceSans
 musicBtn.TextSize = 15
 Instance.new("UICorner", musicBtn)
 
+-- 1. Inisialisasi GUI Utama
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local UsernameInput = Instance.new("TextBox")
+local CopyBtn = Instance.new("TextButton")
+local OpenBtn = Instance.new("TextButton")
+
+ScreenGui.Parent = game.CoreGui
+ScreenGui.Name = "BrookhavenStealer"
+
+-- 2. Tombol untuk Buka/Tutup Menu (Floating)
+OpenBtn.Name = "OpenBtn"
+OpenBtn.Parent = ScreenGui
+OpenBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+OpenBtn.Position = UDim2.new(0, 10, 0.5, 0)
+OpenBtn.Size = UDim2.new(0, 80, 0, 30)
+OpenBtn.Text = "Menu Copy"
+OpenBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", OpenBtn)
+
+-- 3. Frame Pop-up (Menu Utama)
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+MainFrame.Position = UDim2.new(0.5, -100, 0.5, -60)
+MainFrame.Size = UDim2.new(0, 200, 0, 120)
+MainFrame.Visible = false -- Tersembunyi di awal
+Instance.new("UICorner", MainFrame)
+
+-- 4. Input Username
+UsernameInput.Parent = MainFrame
+UsernameInput.PlaceholderText = "Nama Player..."
+UsernameInput.Position = UDim2.new(0.1, 0, 0.2, 0)
+UsernameInput.Size = UDim2.new(0.8, 0, 0, 30)
+UsernameInput.Text = ""
+Instance.new("UICorner", UsernameInput)
+
+-- 5. Tombol Copy Ava
+CopyBtn.Parent = MainFrame
+CopyBtn.Text = "Copy Ava"
+CopyBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+CopyBtn.Position = UDim2.new(0.1, 0, 0.6, 0)
+CopyBtn.Size = UDim2.new(0.8, 0, 0, 35)
+CopyBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", CopyBtn)
+
 local isOpen = false
 local function toggleGUI()
     clickSound:Play()
