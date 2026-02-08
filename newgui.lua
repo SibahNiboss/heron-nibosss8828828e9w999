@@ -262,6 +262,49 @@ end
 toggleBtn.MouseButton1Click:Connect(toggleGUI)
 closeBtn.MouseButton1Click:Connect(toggleGUI)
 
+-- FUNGSI 1: Toggle (Buka/Tutup)
+OpenBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
+-- FUNGSI 2: Auto-Correct & Copy Avatar
+CopyBtn.MouseButton1Click:Connect(function()
+    local input = UsernameInput.Text:lower()
+    local targetPlayer = nil
+    
+    -- Mencari player berdasarkan potongan nama (Auto-correct)
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if string.sub(player.Name:lower(), 1, #input) == input then
+            targetPlayer = player
+            break
+        end
+    end
+
+    if targetPlayer then
+        UsernameInput.Text = targetPlayer.Name -- Koreksi teks ke nama asli
+        
+        -- Eksekusi ke Remote Brookhaven
+        -- Kita pakai pcall (protected call) supaya script gak error kalau remote berubah
+        local success, err = pcall(function()
+            local args = {
+                [1] = "Outfit",
+                [2] = targetPlayer.UserId
+            }
+            game:GetService("ReplicatedStorage").RE:FindFirstChild("AvatarEvent"):FireServer(unpack(args))
+        end)
+        
+        if success then
+            print("Avatar " .. targetPlayer.Name .. " Berhasil di-copy!")
+        else
+            warn("Gagal copy: Remote Brookhaven mungkin berubah.")
+        end
+    else
+        UsernameInput.Text = "Pemain Tidak Ada!"
+        task.wait(1)
+        UsernameInput.Text = ""
+    end
+end)
+
 -- list player
 local listGui = nil
 local function showPlayerList()
