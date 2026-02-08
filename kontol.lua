@@ -182,6 +182,203 @@ musicBtn.Font = Enum.Font.SourceSans
 musicBtn.TextSize = 15
 Instance.new("UICorner", musicBtn)
 
+-- Section Copy Avatar (di dalam canvas main GUI)
+local copySection = Instance.new("Frame")
+copySection.Name = "CopyAvatarSection"
+copySection.Parent = canvas
+copySection.Size = UDim2.new(0, 340, 0, 0)  -- mulai kecil, tween nanti
+copySection.Position = UDim2.new(0, 20, 0, 260)  -- di bawah musicBtn, adjust kalau overlap
+copySection.BackgroundTransparency = 1
+copySection.ClipsDescendants = true
+copySection.Visible = false
+
+-- Tombol BULAT toggle section copy (full circle, glowing)
+local copyToggleBtn = Instance.new("TextButton")
+copyToggleBtn.Parent = canvas
+copyToggleBtn.Size = UDim2.new(0, 55, 0, 55)
+copyToggleBtn.Position = UDim2.new(0.5, -140, 0, 210)  -- taruh di tengah bawah action buttons, sesuain
+copyToggleBtn.BackgroundColor3 = Color3.fromRGB(25, 0, 50)
+copyToggleBtn.Text = "Copy\nAvatar"
+copyToggleBtn.TextColor3 = Color3.fromRGB(180, 0, 255)
+copyToggleBtn.Font = Enum.Font.GothamBold
+copyToggleBtn.TextSize = 13
+copyToggleBtn.AutoButtonColor = false
+local copyCorner = Instance.new("UICorner", copyToggleBtn)
+copyCorner.CornerRadius = UDim.new(1, 0)  -- full bulat
+local copyStroke = Instance.new("UIStroke", copyToggleBtn)
+copyStroke.Color = Color3.fromRGB(180, 0, 255)
+copyStroke.Thickness = 3
+copyStroke.Transparency = 0.2
+
+-- Konten di dalam section
+local copyTargetBox = Instance.new("TextBox")
+copyTargetBox.Parent = copySection
+copyTargetBox.Size = UDim2.new(1, 0, 0, 35)
+copyTargetBox.Position = UDim2.new(0, 0, 0, 0)
+copyTargetBox.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+copyTargetBox.TextColor3 = Color3.new(1,1,1)
+copyTargetBox.PlaceholderText = "Masukin nama / @username target..."
+copyTargetBox.Font = Enum.Font.Gotham
+copyTargetBox.TextSize = 14
+copyTargetBox.ClearTextOnFocus = false
+Instance.new("UICorner", copyTargetBox).CornerRadius = UDim.new(0, 8)
+Instance.new("UIStroke", copyTargetBox).Color = Color3.fromRGB(180, 0, 255)
+
+local copyList = Instance.new("ScrollingFrame")
+copyList.Parent = copySection
+copyList.Size = UDim2.new(1, 0, 0, 110)
+copyList.Position = UDim2.new(0, 0, 0, 45)
+copyList.BackgroundTransparency = 1
+copyList.ScrollBarThickness = 5
+copyList.ScrollBarImageColor3 = Color3.fromRGB(180, 0, 255)
+
+local copyListLayout = Instance.new("UIListLayout", copyList)
+copyListLayout.Padding = UDim.new(0, 6)
+copyListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+local copyExecuteBtn = Instance.new("TextButton")
+copyExecuteBtn.Parent = copySection
+copyExecuteBtn.Size = UDim2.new(1, 0, 0, 45)
+copyExecuteBtn.Position = UDim2.new(0, 0, 0, 165)
+copyExecuteBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 255)
+copyExecuteBtn.Text = "EXECUTE COPY"
+copyExecuteBtn.TextColor3 = Color3.new(1,1,1)
+copyExecuteBtn.Font = Enum.Font.GothamBold
+copyExecuteBtn.TextSize = 16
+Instance.new("UICorner", copyExecuteBtn).CornerRadius = UDim.new(0, 12)
+
+-- Toggle logic section (smooth tween)
+local copyOpen = false
+copyToggleBtn.MouseButton1Click:Connect(function()
+    clickSound:Play()
+    copyOpen = not copyOpen
+    copySection.Visible = copyOpen
+    if copyOpen then
+        TweenService:Create(copySection, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, 340, 0, 220)
+        }):Play()
+    else
+        TweenService:Create(copySection, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+            Size = UDim2.new(0, 340, 0, 0)
+        }):Play()
+    end
+end)
+
+-- Logic Copy Avatar Brookhaven (lu kasih, gw fix minor & tambah protected check)
+local function FindSimilarPlayer(name)
+    name = name:lower()
+    for _, plr in ipairs(Players:GetPlayers()) do
+        local uname = plr.Name:lower()
+        local dname = (plr.DisplayName or ""):lower()
+        if uname:find(name) or dname:find(name) then
+            return plr
+        end
+    end
+    return nil
+end
+
+local function refreshCopyPlayerList()
+    for _, child in ipairs(copyList:GetChildren()) do
+        if child:IsA("TextButton") then
+            child:Destroy()
+        end
+    end
+
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr \~= player then
+            local display = plr.DisplayName or plr.Name
+            local user = plr.Name
+            local nameText = display .. " (@" .. user .. ")"
+
+            local btn = Instance.new("TextButton")
+            btn.Size = UDim2.new(1, -10, 0, 32)
+            btn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+            btn.TextColor3 = Color3.new(1, 1, 1)
+            btn.Text = nameText
+            btn.Font = Enum.Font.Gotham
+            btn.TextSize = 13
+            btn.AutoButtonColor = true
+            btn.Parent = copyList
+
+            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+
+            btn.MouseButton1Click:Connect(function()
+                copyTargetBox.Text = user
+                notify("Target dipilih: " .. user)
+            end)
+        end
+    end
+    copyList.CanvasSize = UDim2.new(0, 0, 0, copyListLayout.AbsoluteContentSize.Y + 15)
+end
+
+Players.PlayerAdded:Connect(refreshCopyPlayerList)
+Players.PlayerRemoving:Connect(refreshCopyPlayerList)
+refreshCopyPlayerList()  -- init pertama
+
+copyExecuteBtn.MouseButton1Click:Connect(function()
+    clickSound:Play()
+    local targetName = copyTargetBox.Text
+    if targetName == "" then
+        notify("Masukkan nama pemain dulu bro!")
+        return
+    end
+
+    local TPlayer = FindSimilarPlayer(targetName)
+    local LChar = player.Character
+    if not (TPlayer and TPlayer.Character and LChar) then
+        notify("Target ga ketemu atau character lu ga ready.")
+        return
+    end
+
+    if isProtected(TPlayer) then
+        notify("Target protected, skip copy!")
+        return
+    end
+
+    local LHumanoid = LChar:FindFirstChildOfClass("Humanoid")
+    local THumanoid = TPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if not (LHumanoid and THumanoid) then 
+        notify("Humanoid error!")
+        return 
+    end
+
+    local PDesc = THumanoid:GetAppliedDescription()
+
+    -- Body parts remote
+    local argsBody = {
+        [1] = {
+            [1] = PDesc.Torso,
+            [2] = PDesc.RightArm,
+            [3] = PDesc.LeftArm,
+            [4] = PDesc.RightLeg,
+            [5] = PDesc.LeftLeg,
+            [6] = PDesc.Head
+        }
+    }
+    ReplicatedStorage.Remotes.ChangeCharacterBody:InvokeServer(unpack(argsBody))
+    task.wait(0.3)
+
+    -- Wear items
+    if tonumber(PDesc.Shirt) then ReplicatedStorage.Remotes.Wear:InvokeServer(tonumber(PDesc.Shirt)) task.wait(0.2) end
+    if tonumber(PDesc.Pants) then ReplicatedStorage.Remotes.Wear:InvokeServer(tonumber(PDesc.Pants)) task.wait(0.2) end
+    if tonumber(PDesc.Face) then ReplicatedStorage.Remotes.Wear:InvokeServer(tonumber(PDesc.Face)) task.wait(0.2) end
+
+    for _, v in ipairs(PDesc:GetAccessories(true)) do
+        if v.AssetId and tonumber(v.AssetId) then
+            ReplicatedStorage.Remotes.Wear:InvokeServer(tonumber(v.AssetId))
+            task.wait(0.2)
+        end
+    end
+
+    -- Body color
+    local SkinColor = TPlayer.Character:FindFirstChild("Body Colors")
+    if SkinColor then
+        ReplicatedStorage.Remotes.ChangeBodyColor:FireServer(tostring(SkinColor.HeadColor))
+    end
+
+    notify("Sukses copy avatar dari " .. TPlayer.DisplayName .. "! Cek di game bro 🔥")
+end)
+
 local isOpen = false
 local function toggleGUI()
     clickSound:Play()
